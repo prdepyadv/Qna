@@ -3,12 +3,9 @@ from django.http import HttpResponse, HttpResponseRedirect
 import datetime
 from django.views.decorators.http import require_http_methods
 from django.shortcuts import redirect
-import pymongo
-from django.template import loader
 from .models import Answer, Question
 from django.http import Http404
 from django.urls import reverse
-from django.http import JsonResponse
 from django.utils import timezone
 from .form import QnaForm
 
