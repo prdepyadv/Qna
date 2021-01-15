@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseRedirect
 import datetime
@@ -9,6 +10,8 @@ from django.urls import reverse
 from django.utils import timezone
 from .form import QnaForm
 
+
+@login_required(login_url='/admin')
 def save(request):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     if request.method == "POST":
@@ -31,7 +34,7 @@ def save(request):
     else:
         return render(request, 'add_question.html', {'latest_question_list': latest_question_list})
 
-
+@login_required(login_url='/admin')
 def index(request):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     if request.method == "POST":
@@ -51,7 +54,7 @@ def index(request):
     else :
         return render(request, 'add_question.html', {'latest_question_list': latest_question_list})
     
-
+@login_required(login_url='/admin')
 def getDetail(request, question_id):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     question = get_object_or_404(Question, pk=question_id)
@@ -60,6 +63,7 @@ def getDetail(request, question_id):
         'question': question
         })
 
+@login_required(login_url='/admin')
 def approve(request, question_id):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     question = get_object_or_404(Question, pk=question_id)
@@ -77,7 +81,7 @@ def approve(request, question_id):
         selected_answer.save()
         return HttpResponseRedirect(reverse('ask_me:results', args=(question.id,)))
 
-
+@login_required(login_url='/admin')
 def results(request, question_id):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     question = get_object_or_404(Question, pk=question_id)
