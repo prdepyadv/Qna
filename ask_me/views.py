@@ -9,8 +9,6 @@ from django.urls import reverse
 from django.utils import timezone
 from .form import QnaForm
 
-
-
 def save(request):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     if request.method == "POST":
