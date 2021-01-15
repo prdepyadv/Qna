@@ -1,0 +1,32 @@
+{% extends "base_generic.html" %}
+
+{% block title %}
+<title>HomePage</title>
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+
+{% block content %}
+
+
+    <form method="POST" action="{% url 'save' %}">
+        {% csrf_token %}
+        <div class="row" style="margin-top: 40px;">
+            <div class="form-group col-md-offset-2 col-md-8">
+                <input type="text" class="form-control form-control-md" 
+                name="question" id="answer" placeholder="Write Question">
+            </div>
+            <div class="form-group col-md-offset-2 col-md-8">
+                <textarea type="text" class="form-control form-control-md" 
+                name="answer" id="answer" 
+                rows="10"></textarea>
+            </div>
+            <div class="form-group col-sm-offset-5 col-md-12">
+                <button type="submit" class="btn btn-primary btn-default">Submit</button>
+            </div>
+        </div>
+    </form>
+
+{% endblock %}
