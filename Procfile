@@ -1,1 +1,1 @@
-web: gunicorn ppyy.wsgi --log-file -
+web: gunicorn Qna.wsgi --log-file -
