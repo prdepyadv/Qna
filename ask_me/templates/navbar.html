@@ -11,10 +11,11 @@
     <div class="collapse navbar-collapse" id="myNavbar">
       <ul class="nav navbar-nav">
         <li class="active"><a href="/">Home</a></li>
+        <li><a href="{% url 'admin:index' %}">Admin</a></li>
         <li><a href="#">About</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-        <li><a href="/admin"><span class="glyphicon glyphicon-log-in"></span> Login</a></li>
+        <li><a href="/admin/logout"><span class="glyphicon glyphicon-log-out"></span> Log-out</a></li>
       </ul>
     </div>
   </div>
