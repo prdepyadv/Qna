@@ -9,16 +9,33 @@ from django.http import Http404
 from django.urls import reverse
 from django.utils import timezone
 from .form import QnaForm
+from django.http.response import JsonResponse
 
 
 @login_required(login_url='/admin')
+def search(request):
+    if request.method == "POST":
+        searchText = request.POST['search'].strip()
+        if not searchText:
+            return render(request, 'add_question.html')
+        questions = Question.objects.filter(
+            question_text__icontains=searchText)
+        if not questions:
+            return render(request, 'add_question.html', {
+                'error_message': "Sorry, nothing really found"
+            })
+        return render(request, 'search.html', {
+            'questions': questions
+        })
+    else:
+        return render(request, 'add_question.html')
+
+@login_required(login_url='/admin')
 def save(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
     if request.method == "POST":
         form = QnaForm(request.POST, request.FILES)
         if not form.is_valid():
             return render(request, 'add_question.html', {
-                'latest_question_list': latest_question_list,
                 'error_message': 'Both question and answer are required.'
             })
         question = request.POST['question']
@@ -28,56 +45,26 @@ def save(request):
         q.answer_set.create(answer=answer, approve=0)
         q.save()
         return render(request, 'add_question.html', {
-            'latest_question_list': latest_question_list,
             'success_message': 'Saved done, Thanks'
         })
     else:
-        return render(request, 'add_question.html', {'latest_question_list': latest_question_list})
-
-@login_required(login_url='/admin')
-def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
-    if request.method == "POST":
-        if not request.POST['search']:
-            return render(request, 'add_question.html', {
-                'latest_question_list': latest_question_list,
-                'error_message': "Sorry, nothing really found"
-            })
-        question = Question.objects.filter(question_text__contains=request.POST['search'])
-        if not question:
-            return render(request, 'add_question.html', {
-                'latest_question_list': latest_question_list,
-                'question': question,
-                'error_message': "Sorry, nothing really found"
-            })
-        else:
-            question = question.last()
-        return render(request, 'results.html', {
-            'latest_question_list': latest_question_list,
-            'question': question
-        })
-    else :
-        return render(request, 'add_question.html', {'latest_question_list': latest_question_list})
+        return render(request, 'add_question.html')
     
 @login_required(login_url='/admin')
 def getDetail(request, question_id):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
     question = get_object_or_404(Question, pk=question_id)
-    return render(request, 'detail.html', {
-        'latest_question_list': latest_question_list,
+    return render(request, 'add_approval.html', {
         'question': question
         })
 
 @login_required(login_url='/admin')
 def approve(request, question_id):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
     question = get_object_or_404(Question, pk=question_id)
     try:
         selected_answer = question.answer_set.get(pk=request.POST['answer'])
     except (KeyError, Answer.DoesNotExist):
         # Redisplay the question voting form.
-        return render(request, 'detail.html', {
-            'latest_question_list': latest_question_list,
+        return render(request, 'add_approval.html', {
             'question': question,
             'error_message': "You didn't select a choice."
         })
@@ -88,9 +75,18 @@ def approve(request, question_id):
 
 @login_required(login_url='/admin')
 def results(request, question_id):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
     question = get_object_or_404(Question, pk=question_id)
     return render(request, 'results.html', {
-        'latest_question_list': latest_question_list,
         'question': question
         })
+
+@login_required(login_url='/admin')
+def lastestQuestions(request):
+    if request.method == 'GET':
+        latest_question_list = Question.objects.order_by('-pub_date')[:10]
+        if not latest_question_list:
+            return JsonResponse({'success': False, 'latest_question_list': {}, 'message': 'No questions are available.'})
+        list = {}
+        for question in latest_question_list:
+            list[question.id] = question.question_text
+        return JsonResponse({'success': True,'latest_question_list':list, 'message':'Latest 10 questions'})

@@ -1,0 +1,19 @@
+<h5 id='last-5'>Latest 10 questions</h5>    
+<script>
+    $(document).ready(function(){
+        $.get("{% url 'lastedQuestions' %}", function(data){
+            $('#last-5').text(data['message'])
+            if(data['success'] == true){
+                $('#last-5').text(data['message']);
+                var list = data['latest_question_list']
+                Object.entries(list).forEach(entry => {
+                    const [key, value] = entry;
+                    var url = "{% url 'ask_me:index' %}";
+                    url = url + key + '/results';
+                    element = "<p><a href='" +url+ "'>"+ value +"</a></p>";
+                    $("#last-5").after(element); 
+                });
+            }
+        });   
+    });
+</script>

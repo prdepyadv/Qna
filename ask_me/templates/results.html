@@ -1,32 +1,29 @@
-{% extends "base_generic.html" %}
+{% extends "layouts/base_generic.html" %}
 
 {% block title %}
-<title>HomePage</title>
+<title>Results</title>
 {% endblock %}
 
 {% block style %}
-<style>
-
-.merge{     position: relative; }
-.merge .search{ position:absolute; right:0px;}
-
-</style>
 {% endblock %}
 
 
 {% block content %}
 
-
-<h1>Q{{ question.id }} {{ question.question_text }}</h1>
-
-    <ul>
+<h1 style="margin-bottom: 15px;">{{ question.id }}. {{ question.question_text.capitalize }}</h1>
     {% for answer in question.answer_set.all %}
-        <li>{{ answer.answer }} --> {{ answer.approve }} approve{{ answer.approve|pluralize }}</li>
+    <div class="row">
+        <div class="form-group col-md-3">
+            <span>{{ answer.posted_on.date }} — Approve{{ answer.approve|pluralize }}:{{ answer.approve }}</span>
+        </div>
+        <div class="form-group col-md-9">
+            <span>{{ answer.answer }}</span>
+        </div>
+    </div>
     {% endfor %}
-    </ul>
 
-    <button type="button" class="btn-default btn" onclick='routeVoteAgain(this);' 
-    data-route="{% url 'ask_me:detail' question.id %}" style="margin-top: 30px;">Approve?</button>
+<button type="button" class="btn-default btn" onclick='routeVoteAgain(this);' 
+    data-route="{% url 'ask_me:detail' question.id %}" style="margin-top: 30px;">Add Approval</button>
 
 <script>
     function routeVoteAgain(obj){

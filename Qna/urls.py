@@ -7,4 +7,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.save, name='save'),
     path('search/', include('ask_me.urls')),
+    path('lastest-questions', views.lastestQuestions, name='lastedQuestions')
 ]

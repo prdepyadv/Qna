@@ -1,0 +1,38 @@
+{% extends "layouts/base_generic.html" %}
+
+{% block title %}
+<title>Search Results</title>
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+
+{% block content %}
+
+{% for question in questions %}
+    <h1 style="margin-bottom: 15px;"><a href="{% url 'ask_me:results' question.id %}"
+        style="font-size: 20px;">
+        {{ question.question_text.capitalize }}</a></h1>
+    <div class="row">
+        {% if not question.answer_set.all %}
+        <div class="form-group col-md-8">
+                <span style="font-size: 14px;">No answer available</span>
+        </div>  
+        {% endif %}
+        {% for answer in question.answer_set.all %}
+            <div class="form-group col-md-3">
+                <span style="font-size: 14px;">{{ answer.posted_on.date }} — Approve{{ answer.approve|pluralize }}:{{ answer.approve }}</span>
+            </div> 
+            <div class="form-group col-md-9">
+                <span style="font-size: 14px;">{{ answer.answer }}</span>
+            </div>      
+        {% endfor %}
+    </div>
+{% endfor %}
+
+<script>
+
+</script>
+   
+{% endblock %}

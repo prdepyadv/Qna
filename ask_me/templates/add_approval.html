@@ -1,0 +1,29 @@
+{% extends "layouts/base_generic.html" %}
+
+{% block title %}
+<title>Add Approval</title>
+{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+
+{% block content %}
+
+<h1 style="margin-bottom: 15px;">{{ question.id }}. {{ question.question_text.capitalize }}</h1>
+<form action="{% url 'ask_me:approve' question.id %}" method="post">
+    {% csrf_token %}
+    <label style="margin-bottom: 10px;">Select an answer below</label>
+    <div class="row">
+        {% for answers in question.answer_set.all %}
+            <div class="form-group col-md-8">
+                <input type="radio" name="answer" id="answer{{ forloop.counter }}" value="{{ answers.id }}">
+                <label for="answer{{ forloop.counter }}"
+                style="font-weight: normal;">{{ answers.answer }}</label>
+            </div>
+        {% endfor %}
+    </div>
+    <input type="submit" value="Approve" style="margin-top: 10px;">
+</form>
+
+{% endblock %}

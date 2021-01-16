@@ -21,6 +21,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.CharField(max_length=500)
     approve = models.IntegerField(default=0)
+    posted_on = models.DateTimeField('Date posted', default=timezone.now())
 
     def __str__(self):
         return self.answer
