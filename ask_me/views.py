@@ -38,6 +38,11 @@ def save(request):
 def index(request):
     latest_question_list = Question.objects.order_by('-pub_date')[:5]
     if request.method == "POST":
+        if not request.POST['search']:
+            return render(request, 'add_question.html', {
+                'latest_question_list': latest_question_list,
+                'error_message': "Sorry, nothing really found"
+            })
         question = Question.objects.filter(question_text__contains=request.POST['search'])
         if not question:
             return render(request, 'add_question.html', {
