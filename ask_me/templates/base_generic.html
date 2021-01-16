@@ -15,6 +15,19 @@
     <style>
         .merge{     position: relative; }
         .merge .search{ position:absolute; right:0px;}
+        html,body{ width: 100%;
+                height: 100%;
+                margin: 0px;
+                padding: 0px;
+                overflow-x: hidden;
+                background: url("/static/images/cloth-569222_960_720.webp");
+                background-size:100% 100%;
+                }
+        hr{
+            border: 0;
+            height: 1px;
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0), #337ab7, rgba(0, 0, 0, 0));
+        }
     </style>
     {% block style %}
     
@@ -55,15 +68,25 @@
                 </div>
                 {% endif %}
                 <hr>
-                
                 {% block content %}{% endblock %}
+                <br>
+                <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+                <ins class="adsbygoogle"
+                    style="display:block"
+                    data-ad-format="fluid"
+                    data-ad-layout-key="-fb+5w+4e-db+86"
+                    data-ad-client="ca-pub-3469164325460285"
+                    data-ad-slot="5471259857"></ins>
+                <script>
+                    (adsbygoogle = window.adsbygoogle || []).push({});
+                </script>
             </div>
             <div class="col-sm-2 sidenav">
                 <div class="well">
-                    <p>ADS</p>
+                    <p>Ads</p>
                 </div>
                 <div class="well">
-                    <p>ADS</p>
+                    <p>Ads</p>
                 </div>
             </div>
         </div>

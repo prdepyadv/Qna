@@ -1,6 +1,12 @@
 {% extends "admin/base.html" %}
 
 {% block title %}{{ title }} | Site admin{% endblock %}
+{% block extrahead %}
+<style>
+
+</style>
+{% endblock %}
+
 
 {% block branding %}
 <h1 id="site-name"><a href="{% url 'admin:index' %}">Administration</a></h1>
