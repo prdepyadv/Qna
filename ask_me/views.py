@@ -35,6 +35,7 @@ def search(request):
             })
 
         """ Try Again - Synonym Game"""
+        searchTextList = searchText.split(' ')
         newSearchList = []
         for search in searchTextList:
             dictionary = PyDictionary()
