@@ -24,6 +24,7 @@ def search(request):
         if not searchText:
             return render(request, 'add_question.html')
         searchTextList = searchText.split(' ')
+        searchTextList.append(searchText)
         questions = reduce(operator.or_, (
             Question.objects.filter(question_text__icontains=text)
             for text in searchTextList))
