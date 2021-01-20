@@ -1,4 +1,6 @@
+from django import http
 from django.contrib.auth.decorators import login_required
+from django.db.models import query
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseRedirect
 import datetime
@@ -10,6 +12,9 @@ from django.urls import reverse
 from django.utils import timezone
 from .form import QnaForm
 from django.http.response import JsonResponse
+from functools import reduce
+import operator
+from PyDictionary import PyDictionary
 
 
 @login_required(login_url='/admin')
@@ -18,15 +23,37 @@ def search(request):
         searchText = request.POST['search'].strip()
         if not searchText:
             return render(request, 'add_question.html')
-        questions = Question.objects.filter(
-            question_text__icontains=searchText)
-        if not questions:
-            return render(request, 'add_question.html', {
-                'error_message': "Sorry, nothing really found",
+        searchTextList = searchText.split(' ')
+        questions = reduce(operator.or_, (
+            Question.objects.filter(question_text__icontains=text)
+            for text in searchTextList))
+        if questions:
+            return render(request, 'search.html', {
+                'questions': questions,
                 'search_message': searchText
             })
-        return render(request, 'search.html', {
-            'questions': questions,
+
+        """ Try Again - Synonym Game"""
+        newSearchList = []
+        for search in searchTextList:
+            dictionary = PyDictionary()
+            searchList = dictionary.synonym(search)
+            if searchList:
+                newSearchList.append(search)
+                newSearchList += searchList
+        if newSearchList:
+            questions = reduce(operator.or_, (
+                Question.objects.filter(
+                    question_text__icontains=text)
+                for text in newSearchList))
+            if questions:
+                return render(request, 'search.html', {
+                    'questions': questions,
+                    'search_message': searchText
+                })
+
+        return render(request, 'add_question.html', {
+            'error_message': "Sorry, nothing really found",
             'search_message': searchText
         })
     else:

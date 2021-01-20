@@ -1,5 +1,5 @@
 import datetime
-
+import django
 from django.db import models
 from django.utils import timezone
 
@@ -21,7 +21,8 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.CharField(max_length=500)
     approve = models.IntegerField(default=0)
-    posted_on = models.DateTimeField('Date posted', default=timezone.now())
+    posted_on = models.DateTimeField(
+        'Date posted', default=django.utils.timezone.now)
 
     def __str__(self):
         return self.answer
