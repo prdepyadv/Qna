@@ -22,10 +22,12 @@ def search(request):
             question_text__icontains=searchText)
         if not questions:
             return render(request, 'add_question.html', {
-                'error_message': "Sorry, nothing really found"
+                'error_message': "Sorry, nothing really found",
+                'search_message': searchText
             })
         return render(request, 'search.html', {
-            'questions': questions
+            'questions': questions,
+            'search_message': searchText
         })
     else:
         return render(request, 'add_question.html')

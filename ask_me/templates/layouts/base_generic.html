@@ -10,11 +10,17 @@
     <script data-ad-client="ca-pub-3469164325460285" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
     </script>
     {% load static %}
+
+    {% block title_image %}
     <link rel="icon" href = "{% static 'images/house.svg' %}" type = "image/x-icon">
+    {% endblock %}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
-        .row.content {height: 550px;}
+        .row.content {height: 100%;}
+        .sidenav {
+            height: 100%;
+            min-height: 550px !important;}
         .merge {  position: relative; }
         .merge .search { position:absolute; right:0px;}
         html,body{ width: 100%;
@@ -50,9 +56,9 @@
                             <div class="merge">
                                 <button type="submit" class="btn btn-primary search"><i class="fa fa-search"></i></button>
                                 <input type="text" class="form-control form-control-lg" 
-                                    name="search" placeholder="Search here....">
+                                autocomplete="off" name="search" placeholder="Search here...."
+                                {% if search_message %} value="{{ search_message }}" {% endif %}>
                             </div>
-                            
                         </div>
                     </div>
                 </form>
@@ -91,8 +97,8 @@
             </div>
         </div>
     </div>
+<script src="{% static 'js/search.js' %}"></script>
 {% block script %}
-    
 {% endblock %}
 </body>
 </html>
