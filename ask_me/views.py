@@ -34,7 +34,7 @@ def search(request):
                 'search_message': searchText
             })
 
-        """ Try Again - Synonym Game"""
+        """ Try Again - Synonym Game """
         searchTextList = searchText.split(' ')
         newSearchList = []
         for search in searchTextList:
@@ -122,3 +122,8 @@ def lastestQuestions(request):
         for question in latest_question_list:
             list[question.id] = question.question_text
         return JsonResponse({'success': True,'latest_question_list':list, 'message':'Latest 10 questions'})
+
+@login_required(login_url='/admin')
+def delete(request, question_id):
+    Question.objects.filter(pk=question_id).delete()
+    return render(request, 'add_question.html', {'success_message': 'Deleted'})

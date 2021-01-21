@@ -22,12 +22,22 @@
     </div>
     {% endfor %}
 
-<button type="button" class="btn-default btn" onclick='routeVoteAgain(this);' 
-    data-route="{% url 'ask_me:detail' question.id %}" style="margin-top: 30px;">Add Approval</button>
+<button type="button" class="btn-primary btn btn-active" onclick='routeVoteAgain(this);' 
+    data-route="{% url 'ask_me:detail' question.id %}" style="margin-top: 30px;">Edit</button>
+<button type="button" class="btn-default btn" 
+    data-route="{% url 'ask_me:delete' question.id %}"
+    style="margin-top: 30px;" onclick="confirmDelete(this)">Delete</button>
 
 <script>
     function routeVoteAgain(obj){
         window.location.href = $(obj).data('route');
+    }
+
+    function confirmDelete(obj){
+        var r = confirm("Are you sure?");
+        if (r == true) {
+            window.location.href = $(obj).data('route');
+        } 
     }
 </script>
    
