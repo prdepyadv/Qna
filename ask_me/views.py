@@ -71,7 +71,7 @@ def save(request):
             })
         question = request.POST['question']
         answer = request.POST['answer']
-        answer = answer.replace("\r\n", "<br>")
+        answer = answer.replace("\r\n", "<br>").replace("\t",'&nbsp;&nbsp;&nbsp;&nbsp;').replace(' ', '&nbsp;')
         q = Question(question_text=question, pub_date=timezone.now())
         q.save()
         q.answer_set.create(answer=answer, approve=0)
