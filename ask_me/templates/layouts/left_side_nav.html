@@ -1,4 +1,7 @@
-<h5 id='last-5'>Latest 10 questions</h5>    
+<h5 id='last-10'>Latest 10 questions</h5>   
+<div id="div-last-10">
+
+</div> 
 <script>
     $(document).ready(function(){
         $.get("{% url 'lastedQuestions' %}", function(data){
@@ -11,7 +14,7 @@
                     var url = "{% url 'ask_me:index' %}";
                     url = url + key + '/results';
                     element = "<p><a href='" +url+ "'>"+ value +"</a></p>";
-                    $("#last-5").after(element); 
+                    $("#div-last-10").prepend(element); 
                 });
             }
         });   

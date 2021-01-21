@@ -126,4 +126,4 @@ def lastestQuestions(request):
 @login_required(login_url='/admin')
 def delete(request, question_id):
     Question.objects.filter(pk=question_id).delete()
-    return render(request, 'add_question.html', {'success_message': 'Deleted'})
+    return render(request, 'add_question.html', {'success_message': 'Deleted successfully.'})
