@@ -4,7 +4,7 @@ from django.db import models
 from django.utils import timezone
 
 class Question(models.Model):
-    question_text = models.CharField(max_length=200)
+    question_text = models.TextField()
     pub_date = models.DateTimeField('Date published')
 
     def __str__(self):
@@ -19,7 +19,7 @@ class Question(models.Model):
 
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer = models.CharField(max_length=500)
+    answer = models.TextField(default=None)
     approve = models.IntegerField(default=0)
     posted_on = models.DateTimeField(
         'Date posted', default=django.utils.timezone.now)
