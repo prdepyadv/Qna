@@ -18,7 +18,7 @@ if os.path.isfile(dotenv_file):
 SECRET_KEY=os.environ['SECRET_KEY']
 DEBUG = os.environ['Debug']
 
-ALLOWED_HOSTS = ['ppyy.herokuapp.com', 'localhost']
+ALLOWED_HOSTS = ['ppyy.herokuapp.com', 'localhost', '127.0.0.1']
 
 
 # Application definition

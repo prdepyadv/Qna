@@ -16,7 +16,7 @@
         <div class="form-group col-md-3">
             <span>{{ answer.posted_on.date }} — Approve{{ answer.approve|pluralize }}:{{ answer.approve }}</span>
         </div>
-        <div class="form-group col-md-9">
+        <div class="form-group col-md-9" style="overflow-wrap:break-word;">
             <span>{{ answer.answer|safe }}</span>
         </div>
     </div>
