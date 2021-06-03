@@ -12,9 +12,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY=config('SECRET_KEY')
-DEBUG = config('Debug')
+DEBUG = False if config('Debug') == 'False' or not config('Debug') else True
 
-ALLOWED_HOSTS = ['ppyy.herokuapp.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['ppyy.herokuapp.com', '127.0.0.1']
 
 
 # Application definition
