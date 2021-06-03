@@ -1,7 +1,7 @@
 
 import dj_database_url
 import os
-import dotenv
+from decouple import config
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -11,12 +11,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-dotenv_file = os.path.join(BASE_DIR, ".env")
-if os.path.isfile(dotenv_file):
-    dotenv.load_dotenv(dotenv_file)
-
-SECRET_KEY=os.environ['SECRET_KEY']
-DEBUG = os.environ['Debug']
+SECRET_KEY=config('SECRET_KEY')
+DEBUG = config('Debug')
 
 ALLOWED_HOSTS = ['ppyy.herokuapp.com', 'localhost', '127.0.0.1']
 

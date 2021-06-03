@@ -17,13 +17,7 @@ import operator
 from PyDictionary import PyDictionary
 import requests
 from django.utils.html import strip_tags
-import os
-import dotenv
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-dotenv_file = os.path.join(BASE_DIR, ".env")
-if os.path.isfile(dotenv_file):
-    dotenv.load_dotenv(dotenv_file)
+from decouple import config
 
 
 @login_required(login_url='/admin')
@@ -145,8 +139,8 @@ def delete(request, question_id):
 
 
 def emailQuestion(Question = None):
-    mailGunDomainName = os.environ['Mailgun_Domain_Name']
-    mailGunApiKey = os.environ['Mailgun_API_Key']
+    mailGunDomainName = config('Mailgun_Domain_Name')
+    mailGunApiKey = config('Mailgun_API_Key')
     message = "Hello Team,\nThis new question '" + strip_tags(Question) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
     return requests.post(
             "https://api.mailgun.net/v3/"+mailGunDomainName+"/messages",
