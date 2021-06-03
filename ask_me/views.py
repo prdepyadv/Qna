@@ -87,7 +87,7 @@ def save(request):
         q.save()
 
         try:
-            emailQuestion(request.user, question)
+            emailQuestion(question)
         except NameError:
             print(NameError)
         
@@ -144,7 +144,7 @@ def delete(request, question_id):
     return render(request, 'add_question.html', {'success_message': 'Deleted successfully.'})
 
 
-def emailQuestion(User, Question = None):
+def emailQuestion(Question = None):
     mailGunDomainName = os.environ['Mailgun_Domain_Name']
     mailGunApiKey = os.environ['Mailgun_API_Key']
     message = "Hello Team,\nThis new question '"
