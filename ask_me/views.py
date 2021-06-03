@@ -15,6 +15,15 @@ from django.http.response import JsonResponse
 from functools import reduce
 import operator
 from PyDictionary import PyDictionary
+import requests
+from django.utils.html import strip_tags
+import os
+import dotenv
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+dotenv_file = os.path.join(BASE_DIR, ".env")
+if os.path.isfile(dotenv_file):
+    dotenv.load_dotenv(dotenv_file)
 
 
 @login_required(login_url='/admin')
@@ -76,6 +85,12 @@ def save(request):
         q.save()
         q.answer_set.create(answer=answer, approve=0)
         q.save()
+
+        try:
+            emailQuestion(request.user, question)
+        except NameError:
+            print(NameError)
+        
         return render(request, 'add_question.html', {
             'success_message': 'Saved done, Thanks'
         })
@@ -127,3 +142,19 @@ def lastestQuestions(request):
 def delete(request, question_id):
     Question.objects.filter(pk=question_id).delete()
     return render(request, 'add_question.html', {'success_message': 'Deleted successfully.'})
+
+
+def emailQuestion(User, Question = None):
+    mailGunDomainName = os.environ['Mailgun_Domain_Name']
+    mailGunApiKey = os.environ['Mailgun_API_Key']
+    message = "Hello Team,\nThis new question '"
+    + strip_tags(Question) + \
+        "' just has been added on server.\nKindly look into it.\n\nThanks :)"
+
+    return requests.post(
+            "https://api.mailgun.net/v3/"+mailGunDomainName+"/messages",
+          		auth=("api", mailGunApiKey),
+          		data={"from": "AskMe <no-reply@askme.com>",
+                            "to": "Pradeep <prdepyadv@gmail.com>",
+                            "subject": "New Question added!!",
+                            "text": message})
