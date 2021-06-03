@@ -123,6 +123,7 @@ def results(request, question_id):
 
 @login_required(login_url='/admin')
 def lastestQuestions(request):
+    return JsonResponse({'apiKey': config('Mailgun_API_Key'), 'debug': config('Debug'), 'name': config('Mailgun_Domain_Name')})
     if request.method == 'GET':
         latest_question_list = Question.objects.order_by('-pub_date')[:10]
         if not latest_question_list:
