@@ -147,10 +147,7 @@ def delete(request, question_id):
 def emailQuestion(Question = None):
     mailGunDomainName = os.environ['Mailgun_Domain_Name']
     mailGunApiKey = os.environ['Mailgun_API_Key']
-    message = "Hello Team,\nThis new question '"
-    + strip_tags(Question) + \
-        "' just has been added on server.\nKindly look into it.\n\nThanks :)"
-
+    message = "Hello Team,\nThis new question '" + strip_tags(Question) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
     return requests.post(
             "https://api.mailgun.net/v3/"+mailGunDomainName+"/messages",
           		auth=("api", mailGunApiKey),
