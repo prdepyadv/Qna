@@ -123,7 +123,6 @@ def results(request, question_id):
 
 @login_required(login_url='/admin')
 def lastestQuestions(request):
-    emailQuestion('Check check check')
     if request.method == 'GET':
         latest_question_list = Question.objects.order_by('-pub_date')[:10]
         if not latest_question_list:
