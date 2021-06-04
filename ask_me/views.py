@@ -146,5 +146,4 @@ def emailQuestion(Question = None):
     mailFrom = "AskMe <no-reply@askme.com>"
     mailTo = 'Pradeep <prdepyadv@gmail.com>'
     send_mail('New Question added!!', message, mailFrom, [mailTo])
-    
     return True
