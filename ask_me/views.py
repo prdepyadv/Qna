@@ -18,6 +18,7 @@ from PyDictionary import PyDictionary
 import requests
 from django.utils.html import strip_tags
 from decouple import config
+from django.core.mail import send_mail
 
 
 @login_required(login_url='/admin')
@@ -142,10 +143,8 @@ def emailQuestion(Question = None):
     mailGunDomainName = config('Mailgun_Domain_Name')
     mailGunApiKey = config('Mailgun_API_Key')
     message = "Hello Team,\nThis new question '" + strip_tags(Question) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
-    return requests.post(
-            "https://api.mailgun.net/v3/"+mailGunDomainName+"/messages",
-          		auth=("api", mailGunApiKey),
-          		data={"from": "AskMe <no-reply@askme.com>",
-                            "to": "Pradeep <prdepyadv@gmail.com>",
-                            "subject": "New Question added!!",
-                            "text": message})
+    mailFrom = "AskMe <no-reply@askme.com>"
+    mailTo = 'Pradeep <prdepyadv@gmail.com>'
+    send_mail('New Question added!!', message, mailFrom, [mailTo])
+    
+    return True
