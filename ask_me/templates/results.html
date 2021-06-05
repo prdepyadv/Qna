@@ -258,7 +258,7 @@
                 function (response) {
                     $(obj).attr('disabled', false);
                     if (!response.error) {
-                        //window.location.reload();
+                        window.location.reload();
                         return true;
                     }
                     alert(response.message);
