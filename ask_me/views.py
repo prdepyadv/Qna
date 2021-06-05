@@ -112,7 +112,7 @@ def index(request):
                 question) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
         try:
             mailer = emailer()
-            mailer.emailQuestion(message)
+            mailer.emailQuestion('New Question added!!', message)
         except Exception as e:
             print(e)
         
@@ -217,7 +217,7 @@ def saveAnswer(request):
         questionDataFromDb.question_text) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
     try:
         mailer = emailer()
-        mailer.emailQuestion(message)
+        mailer.emailQuestion('New Answer added!!', message)
     except Exception as e:
         print(e)
 
