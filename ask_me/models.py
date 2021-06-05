@@ -21,6 +21,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.TextField(default=None)
     approve = models.IntegerField(default=0)
+    disapprove = models.IntegerField(default=0)
     posted_on = models.DateTimeField(
         'Date posted', default=django.utils.timezone.now)
 

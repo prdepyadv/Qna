@@ -5,28 +5,63 @@
 {% endblock %}
 
 {% block style %}
+<style>
+
+.fa{
+        cursor: pointer;
+        margin: 5px;
+}
+
+</style>
 {% endblock %}
 
 
 {% block content %}
 
-<h1 style="margin-bottom: 15px;">{{ question.id }}. {{ question.question_text.capitalize }}</h1>
-    {% for answer in question.answer_set.all %}
-    <div class="row">
-        <div class="form-group col-md-3">
-            <span>{{ answer.posted_on.date }} — Approve{{ answer.approve|pluralize }}:{{ answer.approve }}</span>
-        </div>
-        <div class="form-group col-md-9" style="overflow-wrap:break-word;">
-            <span>{{ answer.answer|safe }}</span>
-        </div>
+<div class="row head-row">
+    <div class="col-md-12">
+        <h2 style="margin-bottom: 15px;">{{ question.id }}. {{ question.question_text.capitalize }}</h2>
     </div>
-    {% endfor %}
+</div>
 
-<button type="button" class="btn-primary btn btn-active" onclick='routeVoteAgain(this);' 
-    data-route="{% url 'ask_me:detail' question.id %}" style="margin-top: 30px;">Edit</button>
-<button type="button" class="btn-default btn" 
-    data-route="{% url 'ask_me:delete' question.id %}"
-    style="margin-top: 30px;" onclick="confirmDelete(this)">Delete</button>
+
+{% for answer in question.answer_set.all %}
+<div class="row main-row">
+    <div class="form-group col-md-2 col-sm-2">
+        <span>{{ answer.posted_on.date }}</span>
+        <span>
+            &nbsp;
+            <i class="fa fa-thumbs-up fa-lg approve" aria-hidden="true" data-id="{{ answer.id }}" 
+                title="Like this answer">&nbsp;<span id="like-{{ answer.id }}">{{ answer.approve }}</span></i>
+            &nbsp;&nbsp;
+            <i class="fa fa-thumbs-down fa-lg disapprove" aria-hidden="true" data-id="{{ answer.id }}" 
+                title="Dislike this answer">&nbsp;<span id="dislike-{{ answer.id }}">{{ answer.disapprove }}</span></i>
+        </span>
+    </div>
+    <div class="form-group col-md-8 col-sm-8 answer-div" style="overflow-wrap:break-word;">
+        <span class="answer">{{ answer.answer|safe }}</span>
+    </div>
+    <div class="form-group col-md-2 col-sm-2">
+        <i class="fa fa-edit fa-lg edit" aria-hidden="true" title="Edit this answer"></i>
+        <i class="fa fa-check fa-lg save" aria-hidden="true" title="Save Changes" style="display: none;"
+            data-id="{{ answer.id }}"></i>
+        &nbsp;&nbsp;
+        <i class="fa fa-trash fa-lg delete" aria-hidden="true" data-id="{{ answer.id }}"
+            title="Delete this answer"></i>
+    </div>
+</div>
+{% endfor %}
+
+
+<div class="row button-row">
+    <div class="col-md-12">
+        <button type="button" class="btn-primary btn btn-active add-answer" data-id="{{ question.id }}"
+            style="margin-top: 30px;margin-bottom: 30px;">Add Answer</button>
+        <button type="button" class="btn-default btn" data-route="{% url 'ask_me:delete' question.id %}"
+            style="margin-top: 30px;margin-bottom: 30px;" onclick="confirmDelete(this)">Delete Question</button>
+    </div>
+</div>
+
 
 <script>
     function routeVoteAgain(obj){
@@ -39,6 +74,208 @@
             window.location.href = $(obj).data('route');
         } 
     }
+
+    $(document).ready(function(){
+        $('.edit').on('click', function(){
+            deleteBlankRow();
+            $(this).hide();
+            $(this).next().show();
+
+            ansElement = $(this).closest('.row').find('.answer');
+            ans = ansElement.html();
+            ansElement.remove();
+
+            ans = ans.replaceAll("<br>", "&#13;&#10;");
+            $('<textarea/>', {
+                id: 'answer',
+                "class": 'form-control form-control-md answer',
+                'rows': "5",
+                "html": ans,
+                name: 'answer',
+            }).appendTo($(this).closest('.row').find('.answer-div')); 
+
+            $('#answer').on('keydown', function(e) 
+            {
+                if (e.keyCode === 9) { 
+                    var val = this.value,
+                        start = this.selectionStart,
+                        end = this.selectionEnd;
+                    this.value = val.substring(0, start) + '\t' + val.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 1;
+                    return false;
+                }
+            })
+        });
+
+        $('.save').on('click', function(){
+            deleteBlankRow();
+            $(this).hide();
+            $(this).prev().show();
+
+            ansElement = $(this).closest('.row').find('.answer');
+            ans = ansElement.val();
+            prevAns = ansElement.text();
+            ansElement.remove();
+
+            ans = ans.replaceAll("\n", "<br>");
+            id = $(this).attr('data-id');
+            if(id){
+                updateAnswer(ans, id, prevAns);
+            }
+
+            $('<span/>', {
+                id: 'answer',
+                "class": 'answer',
+                "html": ans,
+                name: 'answer',
+            }).appendTo($(this).closest('.row').find('.answer-div'));
+        });
+    
+        $('.delete').on('click', function(){
+            deleteBlankRow();
+            id = $(this).attr('data-id');
+            if(!id){
+                return false;
+            }
+
+            var r = confirm("Do you really want to delete this answer?");
+            if (!r) {
+                return false;
+            } 
+
+            setTimeout(function(){
+                $.post("{% url 'deleteAnswer' %}",
+                {'id': id, csrfmiddlewaretoken: '{{ csrf_token }}'}, 
+                function(response){ 
+                    if(!response.error){
+                        $('*[data-id="' + id + '"]').closest('.main-row').remove();
+                        return true;
+                    }
+                    alert(response.message);
+                    return false;
+                }).fail(function (response) {
+                    alert('Oops! Something went wrong.');
+                    return false;
+                });
+            }, 200)
+            return true;            
+        });
+    
+        $('.add-answer').on('click', function(){
+            if($('.blank-row').length){
+                return false;
+            }
+
+            inputElement = "<br><div class='row blank-row'>" + 
+                "<div class='form-group col-md-10' style = 'overflow-wrap:break-word;' >"+
+                    "<textarea class='form-control form-control-md new-answer' data-question-id='" + $(this).attr('data-id') + "' name='new-answer' id='new-answer' rows='10'></textarea>"+
+                "</div>"+
+                "<div class='form-group col-md-2'>"+
+                    "<button type='button' class='btn-success btn btn-active' onclick='saveNewAnswer(this)' aria-hidden='true' title='Save Changes' style='margin: 5px;'>Save</button>"+
+                    "<button type='button' class='btn btn-secondary delete-blank-row' onclick='deleteBlankRow();' title='Discard' style='margin: 5px;'>Close</button>"+
+                    "</div></div>";
+            
+            if($('.main-row').length){
+                $(inputElement).insertAfter('.main-row:last');
+            } else {
+                $(inputElement).insertAfter('.head-row');
+            }
+
+            $('#new-answer').on('keydown', function (e) {
+                if (e.keyCode === 9) {
+                    var val = this.value,
+                        start = this.selectionStart,
+                        end = this.selectionEnd;
+                    this.value = val.substring(0, start) + '\t' + val.substring(end);
+                    this.selectionStart = this.selectionEnd = start + 1;
+                    return false;
+                }
+            })
+        })
+
+        $('.approve').on('click', function(){
+            answerId = $(this).attr('data-id');
+            urlRoute = "{% url 'addLike' 121 %}".replace(121, answerId);
+            setTimeout(() => {
+                $.get(urlRoute, function (response) {
+                    if (!response.error) {
+                        $('span #like-' + answerId).text(response.data);
+                        return true;
+                    }
+                    alert(response.message);
+                    return false;
+                })
+            }, 200);
+        })
+
+        $('.disapprove').on('click', function () {
+            answerId = $(this).attr('data-id');
+            urlRoute = "{% url 'addDislike' 121 %}".replace(121, answerId);
+            setTimeout(() => {
+                $.get(urlRoute, function (response) {
+                    if (!response.error) {
+                        $('span #dislike-'+answerId).text(response.data);
+                        return true;
+                    }
+                    alert(response.message);
+                    return false;
+                })
+            }, 200);
+            return true;
+        })
+    });
+
+    function updateAnswer(answer, id, prevAns){
+        setTimeout(function(){
+            $.post("{% url 'updateAnswer' %}",
+            {"answer": answer, 'id': id, csrfmiddlewaretoken: '{{ csrf_token }}'}, 
+            function(response){ 
+                if(response.error){
+                    $('*[data-id="' + id + '"]').closest('.row').find('.answer').val(prevAns);
+                    return false;
+                }
+            }).fail(function (response) {
+                alert('Oops! Something went wrong.');
+                return false;
+            });
+        }, 200)
+        return true;
+    }
+
+    function saveNewAnswer(obj) {
+        $(obj).attr('disabled', true);
+        ansElement = $(obj).closest('.blank-row').find('.new-answer');
+        answer = ansElement.val();
+        questionId = ansElement.attr('data-question-id');
+        answer = answer.replaceAll("\n", "<br>");
+        if(! questionId){
+            return false;
+        }
+        
+        setTimeout(function () {
+            $.post("{% url 'saveAnswer' %}",
+                { "answer": answer, 'questionId': questionId, csrfmiddlewaretoken: '{{ csrf_token }}' },
+                function (response) {
+                    $(obj).attr('disabled', false);
+                    if (!response.error) {
+                        //window.location.reload();
+                        return true;
+                    }
+                    alert(response.message);
+                    return false;
+                }).fail(function (response) {
+                    $(obj).attr('disabled', false);
+                    alert('Oops! Something went wrong.');
+                    return false;
+                });
+        }, 200);
+        return true;
+    }
+
+    function deleteBlankRow(){
+        $('.blank-row').remove();
+    }
+    
 </script>
    
 {% endblock %}

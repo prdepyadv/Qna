@@ -19,11 +19,14 @@ import requests
 from django.utils.html import strip_tags
 from decouple import config
 from django.core.mail import send_mail
+from .library.emailer import emailer
 
 
 @login_required(login_url='/admin')
 def search(request):
-    if request.method == "POST":
+    if request.method == "GET":
+        return render(request, 'add_question.html')
+    elif request.method == "POST":
         searchText = request.POST['search'].strip()
         if not searchText:
             return render(request, 'add_question.html')
@@ -63,11 +66,13 @@ def search(request):
             'search_message': searchText
         })
     else:
-        return render(request, 'add_question.html')
+        return JsonResponse({'error': True, 'message': 'Invalid request'})
 
 @login_required(login_url='/admin')
-def save(request):
-    if request.method == "POST":
+def index(request):
+    if request.method == 'GET':
+        return render(request, 'add_question.html')
+    elif request.method == "POST":
         form = QnaForm(request.POST, request.FILES)
         if not form.is_valid():
             return render(request, 'add_question.html', {
@@ -75,22 +80,48 @@ def save(request):
             })
         question = request.POST['question']
         answer = request.POST['answer']
+        question = question.strip()
+        answer = answer.strip()
         answer = answer.replace("\r\n", "<br>").replace("\t",'&nbsp;&nbsp;&nbsp;&nbsp;').replace(' ', '&nbsp;')
+
+        exists = True
+        try:
+            searchAns = Question.objects.get(
+                question_text__iexact=question)
+        except Question.DoesNotExist:
+            exists = False
+        except Question.MultipleObjectsReturned:
+            exists = True
+        except Exception as e:
+            print(e)
+            return render(request, 'add_question.html', {
+                'error_message': 'Oops! Something went wrong'
+            })
+        if exists:
+            return render(request, 'add_question.html', {
+                'error_message': 'Duplicate question.'
+            })
+
         q = Question(question_text=question, pub_date=timezone.now())
         q.save()
-        q.answer_set.create(answer=answer, approve=0)
+        q.answer_set.create(answer=answer)
         q.save()
 
+        message = "Hello Team,\nThis new question '" + \
+            strip_tags(
+                question) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
         try:
-            emailQuestion(question)
-        except NameError:
-            print(NameError)
+            mailer = emailer()
+            mailer.emailQuestion(message)
+        except Exception as e:
+            print(e)
         
         return render(request, 'add_question.html', {
             'success_message': 'Saved done, Thanks'
         })
+        
     else:
-        return render(request, 'add_question.html')
+        return JsonResponse({'error': True, 'message': 'Invalid request'})
     
 @login_required(login_url='/admin')
 def getDetail(request, question_id):
@@ -98,22 +129,6 @@ def getDetail(request, question_id):
     return render(request, 'add_approval.html', {
         'question': question
         })
-
-@login_required(login_url='/admin')
-def approve(request, question_id):
-    question = get_object_or_404(Question, pk=question_id)
-    try:
-        selected_answer = question.answer_set.get(pk=request.POST['answer'])
-    except (KeyError, Answer.DoesNotExist):
-        # Redisplay the question voting form.
-        return render(request, 'add_approval.html', {
-            'question': question,
-            'error_message': "You didn't select a choice."
-        })
-    else:
-        selected_answer.approve += 1
-        selected_answer.save()
-        return HttpResponseRedirect(reverse('ask_me:results', args=(question.id,)))
 
 @login_required(login_url='/admin')
 def results(request, question_id):
@@ -134,16 +149,96 @@ def lastestQuestions(request):
         return JsonResponse({'success': True,'latest_question_list':list, 'message':'Latest 10 questions'})
 
 @login_required(login_url='/admin')
-def delete(request, question_id):
+def deleteQuestion(request, question_id):
     Question.objects.filter(pk=question_id).delete()
     return render(request, 'add_question.html', {'success_message': 'Deleted successfully.'})
 
+@login_required(login_url="/admin")
+def updateAnswer(request):
+    answer = request.POST['answer']
+    answer_id = request.POST['id']
 
-def emailQuestion(Question = None):
-    mailGunDomainName = config('Mailgun_Domain_Name')
-    mailGunApiKey = config('Mailgun_API_Key')
-    message = "Hello Team,\nThis new question '" + strip_tags(Question) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
-    mailFrom = "AskMe <no-reply@askme.com>"
-    mailTo = 'Pradeep <prdepyadv@gmail.com>'
-    send_mail('New Question added!!', message, mailFrom, [mailTo])
-    return True
+    answer = answer.strip()
+    if not answer or not answer_id:
+        return JsonResponse({'error': True, 'message': 'Answer cannot be empty'})
+
+    answer = answer.replace("\r\n", "<br>").replace(
+    "\t", '&nbsp;&nbsp;&nbsp;&nbsp;').replace(' ', '&nbsp;')
+    answerDataFromDb = get_object_or_404(Answer, id=answer_id)
+    if answerDataFromDb.answer.lower() == answer.lower():
+        return JsonResponse({'error': True, 'message': 'Duplicate data'})
+
+    answerDataFromDb.answer = answer
+    answerDataFromDb.save()
+    return JsonResponse({'error': False, 'message': 'Saved'})
+
+@login_required(login_url="/admin")
+def deleteAnswer(request):
+    answer_id = request.POST['id']
+    if not answer_id:
+        return JsonResponse({'error': True, 'message': 'Answer Id cannot be empty'})
+
+    Answer.objects.filter(id=answer_id).delete()
+    return JsonResponse({'error': False, 'message': 'Deleted'})
+
+@login_required(login_url="/admin")
+def saveAnswer(request):
+    answer = request.POST['answer']
+    questionId = request.POST['questionId']
+
+    answer = answer.strip()
+    if not answer or not questionId:
+        return JsonResponse({'error': True, 'message': 'Answer cannot be empty'})
+
+    answer = answer.replace("\r\n", "<br>").replace(
+        "\t", '&nbsp;&nbsp;&nbsp;&nbsp;').replace(' ', '&nbsp;')
+    questionDataFromDb = get_object_or_404(Question, pk=questionId)
+    
+    exists = True
+    try:
+        searchAns = questionDataFromDb.answer_set.get(
+            answer__iexact=answer)
+    except Answer.DoesNotExist:
+        exists = False
+    except Question.MultipleObjectsReturned:
+        exists = True
+    except Exception as e:
+        print(e)
+        return JsonResponse({'error': True, 'message': 'Oops! Something went wrong'})
+
+    if exists:
+        return JsonResponse({'error': True, 'message': 'Duplicate answer.'})
+    
+    questionDataFromDb.answer_set.create(answer=answer)
+    questionDataFromDb.save()
+
+    message = "Hello Team,\nNew Answer for Question '" + \
+    strip_tags(
+        questionDataFromDb.question_text) + "' just has been added on server.\nKindly look into it.\n\nThanks :)"
+    try:
+        mailer = emailer()
+        mailer.emailQuestion(message)
+    except Exception as e:
+        print(e)
+
+    return JsonResponse({'error': False, 'message': 'Saved'})
+
+@login_required(login_url='/admin')
+def addLike(request, answer_id):
+    if not answer_id:
+        return JsonResponse({'error': True, 'message': 'Answer Id cannot be empty'})
+
+    answerDataFromDb = get_object_or_404(Answer, id=answer_id)
+    answerDataFromDb.approve += 1
+    answerDataFromDb.save()
+    return JsonResponse({'error': False, 'message': 'Done', 'data': answerDataFromDb.approve})
+
+@login_required(login_url='/admin')
+def addDislike(request, answer_id):
+    if not answer_id:
+        return JsonResponse({'error': True, 'message': 'Answer cannot be empty'})
+
+    answerDataFromDb = get_object_or_404(Answer, id=answer_id)
+    answerDataFromDb.disapprove += 1
+    answerDataFromDb.save()
+    return JsonResponse({'error': False, 'message': 'Done', 'data': answerDataFromDb.disapprove})

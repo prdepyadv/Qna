@@ -25,6 +25,6 @@ class QuestionAdmin(admin.ModelAdmin):
 
 @admin.register(Answer)
 class AnswerAdmin(admin.ModelAdmin):
-    list_display = ("question", "answer", "approve")
-    list_filter = ("approve", )
+    list_display = ("question", "answer", "approve", "disapprove")
+    list_filter = ("approve", "disapprove")
     search_fields = ("answer__contains", )
