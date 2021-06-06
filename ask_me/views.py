@@ -20,6 +20,7 @@ from django.utils.html import strip_tags
 from decouple import config
 from django.core.mail import send_mail
 from .library.emailer import emailer
+from django.contrib.auth import authenticate, login, logout
 
 
 @login_required(login_url='/admin')
@@ -242,3 +243,17 @@ def addDislike(request, answer_id):
     answerDataFromDb.disapprove += 1
     answerDataFromDb.save()
     return JsonResponse({'error': False, 'message': 'Done', 'data': answerDataFromDb.disapprove})
+
+def logoutUser(request):
+    logout(request)
+    return redirect('/')
+
+def loginUser(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        return redirect('/')
+    else:
+        return JsonResponse({'error': True, 'message': 'Unknown user'})

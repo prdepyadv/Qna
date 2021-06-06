@@ -5,6 +5,8 @@ from django.urls import include, path
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('logout', views.logoutUser, name='logout'),
+    path('login', views.loginUser, name='login'),
     path('', views.index, name='home'),
     path('search/', include('ask_me.urls')),
     path('lastest-10', views.lastestQuestions, name='lastedQuestions'),

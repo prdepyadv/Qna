@@ -13,9 +13,15 @@
 {% block content %}
 
 {% for question in questions %}
-    <h1 style="margin-bottom: 15px;"><a href="{% url 'ask_me:results' question.id %}"
-        style="font-size: 20px;">
-        {{ question.question_text.capitalize }}</a></h1>
+
+    <div class="row head-row">
+        <div class="col-md-12">
+            <h1 style="margin-bottom: 15px;"><a href="{% url 'ask_me:results' question.id %}"
+            style="font-size: 20px;">
+            {{ question.question_text.capitalize }}</a></h1>
+        </div>
+    </div>
+
     <div class="row">
         {% if not question.answer_set.all %}
         <div class="form-group col-md-8">
@@ -24,13 +30,22 @@
         {% endif %}
         {% for answer in question.answer_set.all %}
             <div class="form-group col-md-3">
-                <span style="font-size: 14px;">{{ answer.posted_on.date }} — Approve{{ answer.approve|pluralize }}:{{ answer.approve }}</span>
+                <span font-size: 14px;>{{ answer.posted_on.date }}:</span>
+                <span>
+                    &nbsp;
+                    <i class="fa fa-thumbs-up approve" aria-hidden="true" data-id="{{ answer.id }}"
+                        title="Like this answer">&nbsp;<span id="like-{{ answer.id }}">{{ answer.approve }}</span></i>
+                    &nbsp;&nbsp;
+                    <i class="fa fa-thumbs-down disapprove" aria-hidden="true" data-id="{{ answer.id }}"
+                        title="Dislike this answer">&nbsp;<span id="dislike-{{ answer.id }}">{{ answer.disapprove }}</span></i>
+                </span>
             </div> 
-            <div class="form-group col-md-9">
-                <span style="font-size: 14px;">{{ answer.answer|safe }}</span>
-            </div>      
+            <div class="form-group col-md-9 col-sm-9" style="overflow-wrap:break-word;">
+                <span class="answer" style="font-size: 14px;">{{ answer.answer|safe }}</span>
+            </div>  
         {% endfor %}
     </div>
+
 {% endfor %}
 
 <script>
