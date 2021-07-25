@@ -1,7 +1,5 @@
 <h5 id='last-10'>Latest 10 questions</h5>   
-<div id="div-last-10">
-
-</div> 
+<div id="div-last-10"></div> 
 <script>
     $(document).ready(function(){
         $.get("{% url 'lastedQuestions' %}", function(data){

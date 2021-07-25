@@ -23,6 +23,7 @@
     {% block title_image %}
     <link rel="icon" href = "{% static 'images/house.svg' %}" type = "image/x-icon">
     {% endblock %}
+    <script src="{% static 'js/search.js' %}"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <style>
@@ -33,7 +34,7 @@
                 margin: 0px;
                 padding: 0px;
                 overflow-x: hidden;
-                background: url("/static/images/cloth-569222_960_720.webp");
+                background-color: cornsilk;
                 background-size:100% 100%;
                 }
 
@@ -91,8 +92,17 @@
             </div>
         </div>
     </div>
-<script src="{% static 'js/search.js' %}"></script>
+
+<script>
+    $('.search').on('keyup', function (e) {
+        text = $(this).val();
+        $.get("{% url 'find' %}", { 'find': text}, function (data) {
+            console.log(data);
+        })
+    })
+</script>
 {% block script %}
+
 {% endblock %}
 </body>
 </html>

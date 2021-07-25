@@ -1,3 +1,4 @@
+import re
 from django import http
 from django.contrib.auth.decorators import login_required
 from django.db.models import query
@@ -25,49 +26,48 @@ from django.contrib.auth import authenticate, login, logout
 
 @login_required(login_url='/admin')
 def search(request):
-    if request.method == "GET":
+    searchText = request.GET.get('find')
+    if not searchText:
         return render(request, 'add_question.html')
-    elif request.method == "POST":
-        searchText = request.POST['search'].strip()
-        if not searchText:
-            return render(request, 'add_question.html')
-        searchTextList = searchText.split(' ')
-        searchTextList.append(searchText)
+    searchText = searchText.strip()
+    if not searchText:
+        return render(request, 'add_question.html')
+
+    searchTextList = searchText.split(' ')
+    searchTextList.append(searchText)
+    questions = reduce(operator.or_, (
+        Question.objects.filter(question_text__icontains=text)
+        for text in searchTextList))
+    if questions:
+        return render(request, 'search.html', {
+            'questions': questions,
+            'search_message': searchText
+        })
+
+    """ Try Again - Synonym Game """
+    searchTextList = searchText.split(' ')
+    newSearchList = []
+    for search in searchTextList:
+        dictionary = PyDictionary()
+        searchList = dictionary.synonym(search)
+        if searchList:
+            newSearchList.append(search)
+            newSearchList += searchList
+    if newSearchList:
         questions = reduce(operator.or_, (
-            Question.objects.filter(question_text__icontains=text)
-            for text in searchTextList))
+            Question.objects.filter(
+                question_text__icontains=text)
+            for text in newSearchList))
         if questions:
             return render(request, 'search.html', {
                 'questions': questions,
                 'search_message': searchText
             })
 
-        """ Try Again - Synonym Game """
-        searchTextList = searchText.split(' ')
-        newSearchList = []
-        for search in searchTextList:
-            dictionary = PyDictionary()
-            searchList = dictionary.synonym(search)
-            if searchList:
-                newSearchList.append(search)
-                newSearchList += searchList
-        if newSearchList:
-            questions = reduce(operator.or_, (
-                Question.objects.filter(
-                    question_text__icontains=text)
-                for text in newSearchList))
-            if questions:
-                return render(request, 'search.html', {
-                    'questions': questions,
-                    'search_message': searchText
-                })
-
-        return render(request, 'add_question.html', {
-            'error_message': "Sorry, nothing really found",
-            'search_message': searchText
-        })
-    else:
-        return JsonResponse({'error': True, 'message': 'Invalid request'})
+    return render(request, 'add_question.html', {
+        'error_message': "Sorry, nothing really found",
+        'search_message': searchText
+    })
 
 @login_required(login_url='/admin')
 def index(request):
@@ -257,3 +257,8 @@ def loginUser(request):
         return redirect('/')
     else:
         return JsonResponse({'error': True, 'message': 'Unknown user'})
+
+def find(request):
+    text = request.GET.get('find')
+    return JsonResponse({'key': text})
+
